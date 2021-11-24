@@ -10,7 +10,6 @@ import IPython
 
 class Vehicle(ap.Agent):
     # TODO: agregar metodo para moverse en neighbors con la tag carretera
-    # TODO: agregar metodo para interactuar con los distintos estados del semaforo
     def setup(self):
         self.movimiento = False
         self.grid = self.model.grid
@@ -18,14 +17,11 @@ class Vehicle(ap.Agent):
         self.side = 0
 
     def movement(self):
-        if self.side == 0:
-            self.grid.move_by(self, (1, 0))
-        elif self.side == 1:
-            self.grid.move_by(self, (0, 1))
+        self.grid.move_by(self, [self.speed * 1, self.speed * 0])
 
 
 class StopSign(ap.Agent):
-    # TODO: Agregar estados del semaforo: verde, amarillo, rojo.
+    # TODO: Agregar método para interactuar con los carros
     def setup(self):
         self.status = 1
         self.road = 3
@@ -41,8 +37,6 @@ class Roads(ap.Agent):
 class IntersectionModel(ap.Model):
 
     def setup(self):
-        # TODO: agregar agentes: 1.Vehiculo, 2. Carretera, 3. Semaforo
-
         # Define the grid. Hard coded 10x10
         self.grid = ap.Grid(self, [10] * 2, track_empty=True)
 
@@ -76,13 +70,15 @@ class IntersectionModel(ap.Model):
         # Add agents to the grid in their respective position
         self.grid.add_agents(self.road, road_pos)  # for loop adds road in order to do an intersection
         self.grid.add_agents(self.vehicles_1, positions=[(0, 4)])
-        self.grid.add_agents(self.vehicles_2, positions=[(4, 0)])
         self.grid.add_agents(self.stop_sign, positions=[(3, 5), (5, 3)])
 
     def step(self):
         # TODO: agregar logica para la interaccion entre el objeto semaforo y objeto vehiculo
         moving_cars_1 = self.vehicles_1
-        moving_cars_2 = self.vehicles_2
+
+        for car in moving_cars_1:
+            for i in range(5):
+                car.movement()
 
     def end(self):
         pass
