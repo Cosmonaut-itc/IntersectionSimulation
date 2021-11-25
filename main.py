@@ -8,49 +8,47 @@ import seaborn as sns
 import IPython
 
 
+# TODO : generar en diferentes tiempos los carros
+
 class Vehicle(ap.Agent):
-    # TODO: agregar metodo para moverse en neighbors con la tag carretera
-    # TODO: agregar metodo para interactuar con los distintos estados del semaforo
+    # TODO: corregir el metodo de movement para que el carro deje de moverse solamente cuando este adyacente al semaforo y este esté en rojo.
+    # TODO: agregar que el carro se pare cuando tiene un carro en frente parado
     def setup(self):
-        self.pos = [0,0]
         self.grid = self.model.grid
+        self.pos = [0, 0]
         self.road = 2
         self.side = [1, 0]
         self.speed = 1
-        self.max_speed = 20
-
-    def position(self):
-        self.pos = self.grid.positions[self]
+        self.crossed = False
 
     def direction(self):
+        self.pos = self.grid.positions[self]
         if self.pos[1] == 0:
             self.side = [0, 1]
 
     def movement(self):
-        self.position()
         self.direction()
+        '''
+        for stop in self.model.stop_sign:
+            if stop.pos[0] - 1 == self.pos[0] or stop.pos[1] - 1 == self.pos[1]:
+                if stop.status == 1:
+                    self.grid.move_by(self, [self.speed * self.side[0], self.speed * self.side[1]])
+                elif stop.status == 0:
+                    self.grid.move_by(self, [self.speed * self.side[0], self.speed * self.side[1]])
+        '''
         self.grid.move_by(self, [self.speed * self.side[0], self.speed * self.side[1]])
-
-    def speed_update(self):
-        next_car = self.grid.positions[self]
-
-        min_dist = 100000000
-        for car in self.model.vehicles:
-            if car != self:
-                same_dir = self.side[0]*car.side[0] + self.side[1]*car.side[1]
-
-                car_pos = self.grid.positions[car]
-
-                road_pos = (car_pos[0] - same_dir[0])*self.side[0] + (car_pos[1] - same_dir[1]) * self.side[1]
-
 
 
 class StopSign(ap.Agent):
-    # TODO: Agregar estados del semaforo: verde, amarillo, rojo.
+    # TODO: Agregar metodo que calcule el cambio de estados del semaforo dependiendo de la cantidad de carros.
     def setup(self):
         self.status = 1
         self.road = 3
         self.grid = self.model.grid
+        self.pos = [0, 0]
+
+    def positions(self):
+        self.pos = self.grid.positions[self]
 
 
 class Roads(ap.Agent):
@@ -60,10 +58,7 @@ class Roads(ap.Agent):
 
 
 class IntersectionModel(ap.Model):
-
     def setup(self):
-        # TODO: agregar agentes: 1.Vehiculo, 2. Carretera, 3. Semaforo
-
         # Define the grid. Hard coded 10x10
         self.grid = ap.Grid(self, [10] * 2, track_empty=True)
 
@@ -107,13 +102,15 @@ class IntersectionModel(ap.Model):
 
 parameters = {
     'Vehicles': 2,
-    'steps': 5,
+    'steps': 20,
 }
+
 
 def animation_plot(model, ax):
     attr_grid = model.grid.attr_grid('road')
-    color_dict = {0:'#d5e5d5', 1:'#e5e5e5', 2:'#d62c2c', 3: '#FFFF00',None:'#7FC97F'} #'#d5e5d5' '#d62c2c'
+    color_dict = {0: '#d5e5d5', 1: '#e5e5e5', 2: '#d62c2c', 3: '#FFFF00', None: '#7FC97F'}  # '#d5e5d5' '#d62c2c'
     ap.gridplot(attr_grid, ax=ax, color_dict=color_dict, convert=True)
+
 
 fig, ax = plt.subplots()
 model = IntersectionModel(parameters)
